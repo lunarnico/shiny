@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS types (
 );
 
 CREATE TABLE IF NOT EXISTS abilities (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(30) UNIQUE,
     game_text TEXT
 );
