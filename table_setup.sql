@@ -1,5 +1,3 @@
-DROP TABLE types, abilities, natures, games;
-
 CREATE TABLE IF NOT EXISTS types (
     id INTEGER PRIMARY KEY,
     name VARCHAR(15) UNIQUE
