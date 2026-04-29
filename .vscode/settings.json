@@ -1,0 +1,33 @@
+{
+    "chat.disableAIFeatures": true,
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "sql": false
+    },
+    "pgsql.serverGroups": [
+        {
+            "name": "Servers",
+            "id": "BAB67037-33C2-40C4-93C6-74EE52B49DFB",
+            "isDefault": true
+        }
+    ],
+    "pgsql.connections": [
+        {
+            "id": "88E78CE9-6F57-44E5-9B86-3E5580AAE73B",
+            "groupId": "BAB67037-33C2-40C4-93C6-74EE52B49DFB",
+            "authenticationType": "None",
+            "connectTimeout": 15,
+            "applicationName": "vscode-pgsql",
+            "clientEncoding": "utf8",
+            "sslmode": "prefer",
+            "server": "localhost",
+            "user": "postgres",
+            "profileName": "local",
+            "expiresOn": 0,
+            "profileSource": 0,
+            "emptyPasswordInput": true
+        }
+    ],
+    "pgsql.copilot.enable": false,
+}
