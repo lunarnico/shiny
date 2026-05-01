@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS natures (
     decreases VARCHAR(25)
 );
 
-DROP TABLE games;
 CREATE TABLE IF NOT EXISTS games (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE
@@ -36,7 +35,8 @@ CREATE TABLE IF NOT EXISTS pokemon (
     catch_date VARCHAR(15),
     registered_date VARCHAR(15),
     obtained_by VARCHAR(15),
-    original_trainer VARCHAR(15)
+    original_trainer VARCHAR(15),
+    trainer_id INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS shiny_data (
