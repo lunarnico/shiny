@@ -10,17 +10,16 @@ CREATE TABLE IF NOT EXISTS abilities (
 );
 
 CREATE TABLE IF NOT EXISTS natures (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(25) UNIQUE,
     increases VARCHAR(25),
     decreases VARCHAR(25)
 );
 
+DROP TABLE games;
 CREATE TABLE IF NOT EXISTS games (
-    id INTEGER PRIMARY KEY,
-    name VARCHAR(50) UNIQUE,
-    original_trainer VARCHAR(15),
-    trainer_id INTEGER
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS pokemon (
