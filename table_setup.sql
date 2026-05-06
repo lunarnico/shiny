@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS games (
 );
 
 CREATE TABLE IF NOT EXISTS pokemon (
-    pokedex_number INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    pokedex_number INTEGER,
     name VARCHAR(50),
     level INTEGER CHECK(level >= 1 AND level <= 100),
     ability VARCHAR(30) REFERENCES abilities(name),
@@ -33,15 +34,13 @@ CREATE TABLE IF NOT EXISTS pokemon (
     type_two VARCHAR(15) REFERENCES types(name),
     origin_game VARCHAR(50) REFERENCES games(name),
     catch_date VARCHAR(15),
-    registered_date VARCHAR(15),
     obtained_by VARCHAR(15),
     original_trainer VARCHAR(15),
-    trainer_id INTEGER
+    trainer_id INTEGER 
 );
 
 CREATE TABLE IF NOT EXISTS shiny_data (
-    pokedex_number INTEGER PRIMARY KEY REFERENCES pokemon(pokedex_number),
-    charm BOOLEAN,
+    id INTEGER PRIMARY KEY REFERENCES pokemon(id) NOT NULL,
+    boost BOOLEAN,
     shiny_method VARCHAR(50)
 );
-
