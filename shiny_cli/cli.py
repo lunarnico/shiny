@@ -23,6 +23,25 @@ def list_types():
     except psycopg2.Error as e:
         print(f"Database error: {e}")
 
+def list_games():
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT name FROM games ORDER BY id"
+
+    try:
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        if not results:
+            print("No Types")
+
+        else:
+            for row in results:
+                print(f"{row[0]}")
+            
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+
 def main_menu():
 
     while True:
@@ -30,9 +49,10 @@ def main_menu():
         print("-----------------------------")
         print("1. View Shiny Boosted Pokemon")
         print("2. Increased Nature Count")
-        print("3. Ability Word Finder")
+        print("3. Ability Description Word Finder")
         print("4. Add A New Shiny Pokemon")
-        print("5. Exit")
+        print("5. View Games with Shiny Boost Pokemon Count")
+        print("6. Exit")
 
         choice = input("Select Your Option: ")
 
@@ -45,6 +65,8 @@ def main_menu():
         elif choice == '4':
             add_pokemon()
         elif choice == '5':
+            boost_count()
+        elif choice == '6':
             return
         else:
             print("Invalid choice. Please try again.")
@@ -87,10 +109,11 @@ def shiny_boosted():
             conn.close()
 
 def nature_boosted():
+    print("\nStatus Options:")
+    print("-"*30)
     print("Attack  | Sp. Atk | Speed")
     print("Defense | Sp. Def | ")
-    print(" ")
-    stat_name = input("Enter A Status: ")
+    stat_name = input("Enter a Status: ")
 
     try:
         conn = get_connection()
@@ -107,15 +130,49 @@ def nature_boosted():
         cursor.execute(query, ('%' + stat_name + '%',))
         results = cursor.fetchall()
 
-        print(f"\n{'Nature':<10} | {'Count':<10}")
-        print("-"*20)
+        print(f"\n{'Nature':<10} | {'Number of Pokemon':<20}")
+        print("-"*30)
 
         if not results:
             print("No Natures match")
         else:
             for row in results:
-                print(f"{row[0]:<10} | {row[1]:<10}")
-        print("-"*60)
+                print(f"{row[0]:<10} | {row[1]:<20}")
+        print("-"*30)
+
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"Database error: {e}")
+
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+
+    nat = input("\nEnter a Nature: ")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query2 = """
+                SELECT name, nature
+                FROM pokemon 
+                WHERE nature ILIKE %s
+                """
+            
+        cursor.execute(query2, (nat + '%',))
+        results = cursor.fetchall()
+
+        print(f"\n{'Pokemon':<20} | {'Nature':<20}")
+        print("-"*30)
+
+        if not results:
+            print("No Pokemon matching that nature.")
+        else:
+            for row in results:
+                print(f"{row[0]:<20} | {row[1]:<20}")
+        print("-"*30)
 
     except psycopg2.Error as e:
         conn.rollback()
@@ -172,25 +229,34 @@ def add_pokemon():
     p_nature = input("Enter Nature: ")
     p_gender = input("Enter Gender: ")
     p_nickname = input("Enter Nickname: ")
-    #print("Types: ")
-    #list_types()
 
+    print("\nTypes: ")
+    list_types()
     p_t1 = input("Enter Type One: ")
-    p_t2 = input("Enter Type Two (or leave blank): ")
+    p_t2 = input("Enter Type Two (Press ENTER to leave blank): ")
 
+    print("\nGames: ")
+    list_games()
     p_og = input("Enter Origin Game: ")
-    p_date = input("Enter Catch Date: ")
+
+    p_date = input("Enter Catch Date (MM/DD/YYYY): ")
+
+    print("\nObtained By Methods:")
+    print("\nSelf-Caught | Traded | Gifted")
     p_obtained = input("Enter Obtained By: ")
+    
     p_ot = input("Enter Original Trainer: ")
     p_tid = input("Enter Trainer ID: ")
+
+    t2 = p_t2 if p_t2.strip() != "" else None
 
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO pokemon (pokedex_number, name, level, ability, nature, gender, nickname, origin_game, catch_date, obtained_by, original_trainer, trainer_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (p_dex, p_name, p_level, p_ability, p_nature, p_gender, p_nickname, p_t1, p_t2, p_og, p_date, p_obtained, p_ot, p_tid)
+            "INSERT INTO pokemon (pokedex_number, name, level, ability, nature, gender, nickname, type_one, type_two, origin_game, catch_date, obtained_by, original_trainer, trainer_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (p_dex, p_name, p_level, p_ability, p_nature, p_gender, p_nickname, p_t1, t2, p_og, p_date, p_obtained, p_ot, p_tid)
         )
 
         conn.commit()
@@ -205,5 +271,40 @@ def add_pokemon():
             cursor.close()
             conn.close() 
 
+def boost_count():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        query = """
+                SELECT g.name, COUNT(s.shiny_method)
+                FROM games g
+                JOIN pokemon p ON g.name = p.origin_game
+                JOIN shiny_data s ON p.id = s.id
+                WHERE s.boost = 'True'
+                GROUP BY g.name;
+                """
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        print(f"{'Game':<15} | {'Number of Pokemon':<10}")
+        print("-"*35)
+        
+        if not results:
+            print("No boost found in any game.")
+        else:
+            for row in results:
+                print(f"{row[0]:<15} | {row[1]:<10}")
+        print("-"*30)
+
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"Database error: {e}")
+
+    finally:
+        if conn:
+            cursor.close()
+            conn.close() 
+        
 if __name__ == '__main__':
     main_menu()
