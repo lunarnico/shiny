@@ -1,0 +1,13 @@
+QUERY PLAN
+HashAggregate  (cost=13.25..13.64 rows=39 width=126)
+  Group Key: g.name
+  ->  Hash Join  (cost=6.45..12.93 rows=64 width=128)
+        Hash Cond: ((p.origin_game)::text = (g.name)::text)
+        ->  Hash Join  (cost=4.57..10.87 rows=64 width=20)
+              Hash Cond: (p.id = s.id)
+              ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=14)
+              ->  Hash  (cost=3.77..3.77 rows=64 width=14)
+                    ->  Seq Scan on shiny_data s  (cost=0.00..3.77 rows=64 width=14)
+                          Filter: boost
+        ->  Hash  (cost=1.39..1.39 rows=39 width=118)
+              ->  Seq Scan on games g  (cost=0.00..1.39 rows=39 width=118)

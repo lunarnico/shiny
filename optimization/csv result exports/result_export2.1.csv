@@ -1,0 +1,9 @@
+QUERY PLAN
+HashAggregate  (cost=7.71..7.78 rows=7 width=14)
+  Group Key: p.nature
+  ->  Hash Join  (cost=1.32..7.68 rows=7 width=74)
+        Hash Cond: ((p.nature)::text = (n.name)::text)
+        ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=6)
+        ->  Hash  (cost=1.31..1.31 rows=1 width=136)
+              ->  Seq Scan on natures n  (cost=0.00..1.31 rows=1 width=136)
+                    Filter: ((increases)::text = 'Attack'::text)

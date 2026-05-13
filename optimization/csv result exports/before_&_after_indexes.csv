@@ -1,0 +1,91 @@
+1.
+BEFORE
+Sort  (cost=14.32..14.35 rows=10 width=70)
+  Sort Key: p.pokedex_number
+  ->  Hash Join  (cost=8.09..14.16 rows=10 width=70)
+        Hash Cond: ((p.ability)::text = (a.name)::text)
+        ->  Seq Scan on pokemon p  (cost=0.00..5.63 rows=163 width=22)
+        ->  Hash  (cost=7.85..7.85 rows=19 width=57)
+              ->  Seq Scan on abilities a  (cost=0.00..7.85 rows=19 width=57)
+                    Filter: (game_text ~~* '%speed%'::text)
+
+AFTER
+Sort  (cost=14.57..14.60 rows=11 width=70)
+  Sort Key: p.pokedex_number
+  ->  Hash Join  (cost=8.09..14.38 rows=11 width=70)
+        Hash Cond: ((p.ability)::text = (a.name)::text)
+        ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=22)
+        ->  Hash  (cost=7.85..7.85 rows=19 width=57)
+              ->  Seq Scan on abilities a  (cost=0.00..7.85 rows=19 width=57)
+                    Filter: (game_text ~~* '%speed%'::text)
+
+2.
+BEFORE
+GroupAggregate  (cost=20.58..20.60 rows=1 width=14)
+  Group Key: p.nature
+  ->  Sort  (cost=20.58..20.59 rows=1 width=74)
+        Sort Key: p.nature
+        ->  Hash Join  (cost=14.28..20.57 rows=1 width=74)
+              Hash Cond: ((p.nature)::text = (n.name)::text)
+              ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=6)
+              ->  Hash  (cost=14.25..14.25 rows=2 width=136)
+                    ->  Seq Scan on natures n  (cost=0.00..14.25 rows=2 width=136)
+                          Filter: ((increases)::text = 'Attack'::text)
+
+AFTER
+HashAggregate  (cost=7.71..7.78 rows=7 width=14)
+  Group Key: p.nature
+  ->  Hash Join  (cost=1.32..7.68 rows=7 width=74)
+        Hash Cond: ((p.nature)::text = (n.name)::text)
+        ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=6)
+        ->  Hash  (cost=1.31..1.31 rows=1 width=136)
+              ->  Seq Scan on natures n  (cost=0.00..1.31 rows=1 width=136)
+                    Filter: ((increases)::text = 'Attack'::text)
+
+3.
+BEFORE
+Hash Join  (cost=5.77..12.07 rows=94 width=29)
+  Hash Cond: (p.id = s.id)
+  ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=23)
+  ->  Hash  (cost=4.60..4.60 rows=94 width=14)
+        ->  Seq Scan on shiny_data s  (cost=0.00..4.60 rows=94 width=14)
+              Filter: boost
+
+AFTER
+Hash Join  (cost=4.57..10.87 rows=64 width=29)
+  Hash Cond: (p.id = s.id)
+  ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=23)
+  ->  Hash  (cost=3.77..3.77 rows=64 width=14)
+        ->  Seq Scan on shiny_data s  (cost=0.00..3.77 rows=64 width=14)
+              Filter: boost
+
+4.
+BEFORE 
+HashAggregate  (cost=17.46..18.40 rows=94 width=126)
+  Group Key: g.name
+  ->  Nested Loop  (cost=5.93..16.99 rows=94 width=128)
+        ->  Hash Join  (cost=5.77..12.07 rows=94 width=20)
+              Hash Cond: (p.id = s.id)
+              ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=14)
+              ->  Hash  (cost=4.60..4.60 rows=94 width=14)
+                    ->  Seq Scan on shiny_data s  (cost=0.00..4.60 rows=94 width=14)
+                          Filter: boost
+        ->  Memoize  (cost=0.16..0.44 rows=1 width=118)
+              Cache Key: p.origin_game
+              Cache Mode: logical
+              ->  Index Only Scan using games_name_key on games g  (cost=0.15..0.43 rows=1 width=118)
+                    Index Cond: (name = (p.origin_game)::text)
+
+AFTER
+HashAggregate  (cost=13.25..13.64 rows=39 width=126)
+  Group Key: g.name
+  ->  Hash Join  (cost=6.45..12.93 rows=64 width=128)
+        Hash Cond: ((p.origin_game)::text = (g.name)::text)
+        ->  Hash Join  (cost=4.57..10.87 rows=64 width=20)
+              Hash Cond: (p.id = s.id)
+              ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=14)
+              ->  Hash  (cost=3.77..3.77 rows=64 width=14)
+                    ->  Seq Scan on shiny_data s  (cost=0.00..3.77 rows=64 width=14)
+                          Filter: boost
+        ->  Hash  (cost=1.39..1.39 rows=39 width=118)
+              ->  Seq Scan on games g  (cost=0.00..1.39 rows=39 width=118)

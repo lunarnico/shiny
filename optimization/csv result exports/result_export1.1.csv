@@ -1,0 +1,9 @@
+QUERY PLAN
+Sort  (cost=14.57..14.60 rows=11 width=70)
+  Sort Key: p.pokedex_number
+  ->  Hash Join  (cost=8.09..14.38 rows=11 width=70)
+        Hash Cond: ((p.ability)::text = (a.name)::text)
+        ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=22)
+        ->  Hash  (cost=7.85..7.85 rows=19 width=57)
+              ->  Seq Scan on abilities a  (cost=0.00..7.85 rows=19 width=57)
+                    Filter: (game_text ~~* '%speed%'::text)

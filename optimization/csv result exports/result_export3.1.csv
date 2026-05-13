@@ -1,0 +1,7 @@
+QUERY PLAN
+Hash Join  (cost=4.57..10.87 rows=64 width=29)
+  Hash Cond: (p.id = s.id)
+  ->  Seq Scan on pokemon p  (cost=0.00..5.81 rows=181 width=23)
+  ->  Hash  (cost=3.77..3.77 rows=64 width=14)
+        ->  Seq Scan on shiny_data s  (cost=0.00..3.77 rows=64 width=14)
+              Filter: boost
